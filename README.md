@@ -1,26 +1,26 @@
 # fighting-boredom
 
-### Ideas
+### Ideas (checked = confirmed)
 
-- [ ] Queries and mutations
+- Queries and mutations
   - [ ] Decide if we need to have seperate apis for query and mutation (for semantic reasons).
   - [ ] Query composition
-  - [ ] Implicit variables (Maybe?)
+  - [ ] Implicit variables
 
-- [ ] Authentication
-  - [ ] Allow extending headers
+- Authentication
+  - [x] Allow extending headers
 
-- [ ] Fragments
-  - [ ] Simple fragments
-  - [ ] Parameterized fragments (Maybe?)
+- Fragments
+  - [x] Simple fragments
+  - [ ] Parameterized fragments
 
-- [ ] Caching
-  - [ ] Local storage
-  - [ ] Memory
-  - [ ] IDB (Maybe?)
+- Caching
+  - [x] Local storage
+  - [x] Memory
+  - [ ] IDB
 
-- [ ] Bindings
-  - [ ] React
+- Bindings
+  - [x] React
   - [ ] Vue
   - [ ] jQuery (obviously)
 
