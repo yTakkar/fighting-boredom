@@ -22,6 +22,7 @@
 - Bindings
   - [x] React
   - [x] Vue
+  - [ ] Web Components
   - [ ] jQuery (obviously)
 
 - [ ] Babel plugin to precompute some of the query stuff (Big maybe?)
