@@ -2,8 +2,9 @@
 
 ### Ideas (checked = confirmed)
 
-- Queries and mutations
+- Queries and mutations and subscriptions
   - [ ] Decide if we need to have seperate apis for query and mutation (for semantic reasons).
+  - [ ] subscriptions support
   - [ ] Query composition
   - [ ] Implicit variables
 
