@@ -25,6 +25,10 @@
   - [ ] Web Components
   - [ ] jQuery (obviously)
 
+- Server library too maybe?
+  - [ ] Query and mutations handling
+  - [ ] Support subscriptions
+
 - [ ] Babel plugin to precompute some of the query stuff (Big maybe?)
 
 ## API sketches
