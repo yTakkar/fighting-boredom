@@ -22,8 +22,8 @@
   "scripts": {
     "build": "tsc",
     "watch": "yarn build --watch",
-    "test": "jest --watch",
-    "test:ci": "jest --coverage",
+    "test": "jest -c jest.config.json --watch",
+    "test:ci": "jest -c jest.config.json --coverage",
     "coverage:ci": "codecov",
     "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
     "lint": "tslint -p tsconfig.json",
