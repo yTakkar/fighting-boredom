@@ -1,6 +1,7 @@
 import { stripWhitespace } from './utils';
 
-import { CacheAdapterTypeClass } from './CacheAdapter';
+import { CacheAdapterTypeClass } from './cache/CacheAdapterTypeClass';
+import NoCacheAdapter from './cache/NoCacheAdapter';
 
 interface GraphQLRequest<T> {
   url: string;
@@ -36,6 +37,7 @@ type Options = {
   makeRequest?<V, R>(req: GraphQLRequest<V>): Promise<GraphQLResponse<R>>;
 };
 
+// TODO: Use fetch to make the api calls
 function makeFetchRequest<V, R>({ query, variables }: GraphQLRequest<V>): Promise<GraphQLResponse<R>> {
   return Promise.resolve({});
 }
@@ -46,30 +48,33 @@ function evaluateInterlop(query: string, queryFrag: string, value: any) {
   return query + queryFrag + value;
 }
 
-export default function GraphQL({ url, makeRequest = makeFetchRequest }: Options) {
-  function createQueryParser() {
-    return function q(strFrags: TemplateStringsArray, ...args: Array<Fragment | any>): QueryParser {
-      const query = strFrags.reduce((query, strFrag, index) => {
-        return evaluateInterlop(query, strFrag, args[index]);
-      }, '');
+export default function GraphQL({ url, makeRequest = makeFetchRequest, cacheAdapter = NoCacheAdapter() }: Options) {
+  const createQueryParser = () => (strFrags: TemplateStringsArray, ...args: Array<Fragment | any>): QueryParser => {
+    const query = strFrags.reduce((query, strFrag, index) => evaluateInterlop(query, strFrag, args[index]), '');
 
-      // Minification of final query
-      const minifiedQuery = stripWhitespace(query);
+    // Minification of final query
+    const minifiedQuery = stripWhitespace(query);
 
-      return {
-        run: <V, R>(variables?: V) => makeRequest<V, R>({ url, query: minifiedQuery, variables }),
-      };
+    return {
+      async run<V, R>(variables?: V) {
+        const cacheKey = JSON.stringify({ query: minifiedQuery, variables });
+        const cache = await cacheAdapter.getItem(cacheKey);
+        if (cache) return cache;
+
+        const response = await makeRequest<V, R>({ url, query: minifiedQuery, variables });
+
+        cacheAdapter.setItem(cacheKey, response);
+        return response;
+      },
     };
-  }
+  };
 
-  function createFragment(): Fragment {
-    return function fragment(strFrags: TemplateStringsArray, ...args: Array<Fragment | any>) {
-      return {
-        name: '<Fragmentname>',
-        toString: () => '',
-      };
+  const createFragment = () => (strFrags: TemplateStringsArray, ...args: Array<Fragment | any>): Fragment => {
+    return {
+      name: '<Fragmentname>',
+      toString: () => '',
     };
-  }
+  };
 
   return {
     query: createQueryParser(),

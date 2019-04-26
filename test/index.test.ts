@@ -1,4 +1,5 @@
 import GraphQL from '../src';
+import MemoryCacheAdapter from '../src/cache/MemoryCacheAdapter';
 
 describe('GraphQL', () => {
   let mockMakeRequest = jest.fn(() => Promise.resolve({}));
@@ -69,7 +70,7 @@ describe('Query instance', () => {
     });
   });
 
-  it('should only call makeRequest once (cached)', async () => {
+  it('should call makeRequest twice (no cache)', async () => {
     const gql = GraphQL({
       url: 'https://someapi.com/graphql',
       makeRequest: mockMakeRequest,
@@ -78,17 +79,37 @@ describe('Query instance', () => {
     const hwQuery = gql.query`
       query HelloWorld {
         hello
-        ${'world'}
+        world
       }
     `;
 
-    const resp = await hwQuery.run();
-
+    const r1 = await hwQuery.run();
     expect(mockMakeRequest).toHaveBeenCalledTimes(1);
-    expect(resp).toEqual({
+    const r2 = await hwQuery.run();
+
+    expect(r1).toEqual(r2);
+    expect(mockMakeRequest).toHaveBeenCalledTimes(2);
+  });
+
+  it('should only call makeRequest once (memory cached)', async () => {
+    const gql = GraphQL({
       url: 'https://someapi.com/graphql',
-      variables: undefined,
-      query: `query HelloWorld { hello world }`,
+      makeRequest: mockMakeRequest,
+      cacheAdapter: MemoryCacheAdapter()
     });
+
+    const hwQuery = gql.query`
+      query HelloWorld {
+        hello
+        world
+      }
+    `;
+
+    const r1 = await hwQuery.run();
+    expect(mockMakeRequest).toHaveBeenCalledTimes(1);
+    const r2 = await hwQuery.run();
+
+    expect(r1).toEqual(r2);
+    expect(mockMakeRequest).toHaveBeenCalledTimes(1);
   });
 });
