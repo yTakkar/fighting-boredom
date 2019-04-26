@@ -1,9 +1,6 @@
 import { stripWhitespace } from './utils';
 
-interface CacheAdapterTypeClass {
-  getItem(k: string): Promise<any>;
-  setItem(k: string, v: any): Promise<any>;
-}
+import { CacheAdapterTypeClass } from './CacheAdapter';
 
 interface GraphQLRequest<T> {
   url: string;
@@ -25,17 +22,17 @@ interface GraphQLResponse<T> {
 }
 
 interface QueryParser {
-  run<V, R>(variables?: V): Promise<GraphQLResponse<R>>
+  run<V, R>(variables?: V): Promise<GraphQLResponse<R>>;
 }
 
 interface Fragment {
-  name: string
-  toString(): string
+  name: string;
+  toString(): string;
 }
 
 type Options = {
   url: string;
-  cacheAdapter?: CacheAdapterTypeClass;
+  cacheAdapter?: CacheAdapterTypeClass<any>;
   makeRequest?<V, R>(req: GraphQLRequest<V>): Promise<GraphQLResponse<R>>;
 };
 
@@ -50,9 +47,8 @@ function evaluateInterlop(query: string, queryFrag: string, value: any) {
 }
 
 export default function GraphQL({ url, makeRequest = makeFetchRequest }: Options) {
-
   function createQueryParser() {
-    return function q(strFrags: TemplateStringsArray, ...args: Array<Fragment|any>): QueryParser {
+    return function q(strFrags: TemplateStringsArray, ...args: Array<Fragment | any>): QueryParser {
       const query = strFrags.reduce((query, strFrag, index) => {
         return evaluateInterlop(query, strFrag, args[index]);
       }, '');
@@ -61,18 +57,18 @@ export default function GraphQL({ url, makeRequest = makeFetchRequest }: Options
       const minifiedQuery = stripWhitespace(query);
 
       return {
-        run:<V, R> (variables?: V) => makeRequest<V, R>({ url, query: minifiedQuery, variables }),
+        run: <V, R>(variables?: V) => makeRequest<V, R>({ url, query: minifiedQuery, variables }),
       };
     };
   }
 
   function createFragment(): Fragment {
-    return function fragment(strFrags: TemplateStringsArray, ...args: Array<Fragment|any>) {
+    return function fragment(strFrags: TemplateStringsArray, ...args: Array<Fragment | any>) {
       return {
         name: '<Fragmentname>',
         toString: () => '',
       };
-    }
+    };
   }
 
   return {
