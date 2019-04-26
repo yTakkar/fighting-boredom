@@ -1,3 +1,5 @@
+import { stripWhitespace } from './utils';
+
 interface CacheAdapterTypeClass {
   getItem(k: string): Promise<any>;
   setItem(k: string, v: any): Promise<any>;
@@ -23,7 +25,7 @@ interface GraphQLResponse<T> {
 }
 
 interface QueryParser {
-  run<T>(variables?: T): Promise<GraphQLResponse<T>>
+  run<V, R>(variables?: V): Promise<GraphQLResponse<R>>
 }
 
 interface Fragment {
@@ -34,32 +36,32 @@ interface Fragment {
 type Options = {
   url: string;
   cacheAdapter?: CacheAdapterTypeClass;
-  makeRequest?<T>(req: GraphQLRequest<any>): Promise<GraphQLResponse<T>>;
+  makeRequest?<V, R>(req: GraphQLRequest<V>): Promise<GraphQLResponse<R>>;
 };
 
-function makeFetchRequest<T>({ query, variables }: GraphQLRequest<any>): Promise<GraphQLResponse<T>> {
+function makeFetchRequest<V, R>({ query, variables }: GraphQLRequest<V>): Promise<GraphQLResponse<R>> {
   return Promise.resolve({});
+}
+
+function evaluateInterlop(query: string, queryFrag: string, value: any) {
+  if (value == null) return query + queryFrag;
+  // TODO: handle interlop Fragment
+  return query + queryFrag + value;
 }
 
 export default function GraphQL({ url, makeRequest = makeFetchRequest }: Options) {
 
   function createQueryParser() {
-    function evaluateInterlop(query: string, queryFrag: string, value: any) {
-      if (value == null) return query + queryFrag;
-      // TODO: handle interlop Fragment
-      return query + queryFrag + value;
-    }
-
     return function q(strFrags: TemplateStringsArray, ...args: Array<Fragment|any>): QueryParser {
       const query = strFrags.reduce((query, strFrag, index) => {
         return evaluateInterlop(query, strFrag, args[index]);
       }, '');
 
       // Minification of final query
-      const minifiedQuery = query.replace(/\s+/g, ' ').trim();
+      const minifiedQuery = stripWhitespace(query);
 
       return {
-        run:<T> (variables?: T) => makeRequest<T>({ url, query: minifiedQuery, variables }),
+        run:<V, R> (variables?: V) => makeRequest<V, R>({ url, query: minifiedQuery, variables }),
       };
     };
   }

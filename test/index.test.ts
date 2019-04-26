@@ -35,7 +35,7 @@ describe('Query instance', () => {
       }
     `;
 
-    const resp = await hwQuery.run<any>();
+    const resp = await hwQuery.run();
 
     expect(mockMakeRequest).toHaveBeenCalledTimes(1);
     expect(resp).toEqual({
@@ -59,7 +59,7 @@ describe('Query instance', () => {
       }
     `;
 
-    const resp = await hwQuery.run<any>();
+    const resp = await hwQuery.run();
 
     expect(mockMakeRequest).toHaveBeenCalledTimes(1);
     expect(resp).toEqual({
