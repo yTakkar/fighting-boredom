@@ -5,4 +5,4 @@ export default function NoCacheAdapter(): CacheAdapterTypeClass<any> {
     getItem: async (key: string) => null,
     setItem: async (key: string, value: any) => null,
   };
-};
+}

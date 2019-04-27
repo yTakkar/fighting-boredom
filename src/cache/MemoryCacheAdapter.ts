@@ -6,4 +6,4 @@ export default function MemoryCacheAdapter(): CacheAdapterTypeClass<any> {
     getItem: async (key: string) => cache[key],
     setItem: async (key: string, value: any) => (cache[key] = value),
   };
-};
+}

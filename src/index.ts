@@ -49,8 +49,11 @@ function evaluateInterlop(query: string, queryFrag: string, value: any) {
 }
 
 export default function GraphQL({ url, makeRequest = makeFetchRequest, cacheAdapter = NoCacheAdapter() }: Options) {
+  const interlopTemplateString = (strFrags: TemplateStringsArray, args: Array<Fragment | any>) =>
+    strFrags.reduce((query, strFrag, index) => evaluateInterlop(query, strFrag, args[index]), '');
+
   const createQueryParser = () => (strFrags: TemplateStringsArray, ...args: Array<Fragment | any>): QueryParser => {
-    const query = strFrags.reduce((query, strFrag, index) => evaluateInterlop(query, strFrag, args[index]), '');
+    const query = interlopTemplateString(strFrags, args);
 
     // Minification of final query
     const minifiedQuery = stripWhitespace(query);
