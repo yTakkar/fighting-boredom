@@ -1,44 +1,87 @@
-# fighting-boredom
+# gqler
 
 <!--
 [![CircleCI](https://img.shields.io/circleci/project/github/phenax/pipey/master.svg?style=for-the-badge)](https://circleci.com/gh/phenax/pipey)
 [![npm bundle size (minified + gzip)](https://img.shields.io/bundlephobia/minzip/pipey.svg?style=for-the-badge)](https://www.npmjs.com/package/pipey)
 [![Codecov](https://img.shields.io/codecov/c/github/phenax/pipey.svg?style=for-the-badge)](https://codecov.io/gh/phenax/pipey)
 
-[Read the documentation for more information](https://github.com/phenax/pipey/tree/master/docs)
 -->
 
-### Ideas (checked = confirmed)
+[Read the documentation for more information](https://github.com/yTakkar/fighting-boredom/tree/master/docs)
 
-- Queries and mutations and subscriptions
-  - [ ] Decide if we need to have seperate apis for query and mutation (for semantic reasons).
-  - [ ] subscriptions support
-  - [ ] Query composition
-  - [ ] Implicit variables
 
-- Authentication
-  - [x] Allow extending headers
+## Gettings started
 
-- Fragments
-  - [x] Simple fragments
-  - [ ] Parameterized fragments
+### Install the package
+```
+yarn add gqler
+```
 
-- Caching
-  - [x] Local storage
-  - [x] Memory
-  - [ ] IDB
+### Create a gql instance
 
-- Bindings
-  - [x] React
-  - [x] Vue
-  - [ ] Web Components
-  - [ ] jQuery (obviously)
+```ts
+import GQLer from 'gqler';
+import MemoryCache from 'gqler/lib/cache/MemoryCache';
 
-- Server library too maybe?
-  - [ ] Query and mutations handling
-  - [ ] Support subscriptions
+const gql = GQLer({
+  url: 'https://example.com/graphql',
+  cacheAdapter: MemoryCache(),
+});
+```
 
-- [ ] Babel plugin to precompute some of the query stuff (Big "maybe"?)
 
-## API sketches
-https://gist.github.com/phenax/53bff960c9e6fd98fffa258e8431c7ff
+### Creating and executing a query
+
+```ts
+const userData = gql.query`
+  query UserData($uid: String) {
+    user(uid: $uid) {
+      uid
+      name
+      age
+      addresses {
+        id
+        line1
+        line2
+        city
+        country
+      }
+    }
+  }
+`;
+
+async function fetchUser() {
+  const response = await userData.run({ uid: '13wsffw' });
+  return response.data;
+}
+```
+
+
+### Creating and using fragments
+
+```ts
+const userAddressFragment = gql.fragment`
+  fragment UserAddressPart on User {
+    addresses {
+      id
+      line1
+      line2
+      city
+      country
+    }
+  }
+`;
+
+const userData = gql.query`
+  query UserData($uid: String) {
+    user(uid: $uid) {
+      uid
+      name
+      age
+      ${userAddressFragment}
+    }
+  }
+`;
+```
+
+
